@@ -5,7 +5,7 @@ SERVER=`hostname -s | tr '[a-z]' '[A-Z]'`
 
 EMAILLIST=llamers@mcw.edu
 if [ "$SERVER" == "REED" ]; then
-  EMAILLIST=llamers@mcw.edu,mtutaj@mcw.edu
+  EMAILLIST=llamers@mcw.edu,mtutaj@mcw.edu,jrsmith@mcw.edu,akwitek@mcw.edu
 fi
 
 APPDIR=/home/rgddata/pipelines/$APPNAME
@@ -16,3 +16,4 @@ java -Dspring.config=$APPDIR/../properties/default_db2.xml \
     -jar lib/$APPNAME.jar "$@" > run.log 2>&1
 
 mailx -s "[$SERVER] Marker Load Pipeline Run" $EMAILLIST < $APPDIR/logs/summary.log
+mailx -s "[$SERVER] Marker Load Pipeline Old Marker Expected Sizes" $EMAILLIST < $APPDIR/logs/previousAssemblyData.log
