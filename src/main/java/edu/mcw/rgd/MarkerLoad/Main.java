@@ -132,6 +132,7 @@ public class Main {
                     }
                     if (!Utils.intsAreEqual(sslp.getExpectedSize(), m.getExpectedSize())) {
                         oldDataLog.info(sslp.getName()+"|OLD: "+sslp.getExpectedSize()+"|"+"NEW: "+m.getExpectedSize());
+                        sslp.setExpectedSize(m.getExpectedSize());
                         dao.updateSSLP(sslp);
                         MapData md = new MapData();
                         md.setChromosome(m.getChr());
