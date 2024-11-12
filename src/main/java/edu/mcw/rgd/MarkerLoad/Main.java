@@ -134,15 +134,18 @@ public class Main {
                         oldDataLog.info(sslp.getName()+"|OLD: "+sslp.getExpectedSize()+"|"+"NEW: "+m.getExpectedSize());
                         sslp.setExpectedSize(m.getExpectedSize());
                         dao.updateSSLP(sslp);
-                        MapData md = new MapData();
-                        md.setChromosome(m.getChr());
-                        md.setRgdId(sslp.getRgdId());
-                        md.setStartPos(m.getStart());
-                        md.setStopPos(m.getStop());
-                        md.setStrand(m.getStrand());
-                        md.setMapKey(mapKey);
-                        md.setSrcPipeline("Marker Load Pipeline");
-                        mapDataList.add(md);
+                        List<MapData> mapsData = dao.getMapData(sslp.getRgdId(),mapKey);
+                        if (mapsData.isEmpty()) {
+                            MapData md = new MapData();
+                            md.setChromosome(m.getChr());
+                            md.setRgdId(sslp.getRgdId());
+                            md.setStartPos(m.getStart());
+                            md.setStopPos(m.getStop());
+                            md.setStrand(m.getStrand());
+                            md.setMapKey(mapKey);
+                            md.setSrcPipeline("Marker Load Pipeline");
+                            mapDataList.add(md);
+                        }
                     }
                 }
             }

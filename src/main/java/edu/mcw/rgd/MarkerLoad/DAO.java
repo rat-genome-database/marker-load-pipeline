@@ -45,4 +45,7 @@ public class DAO {
         return mdao.insertMapData(mapDataList);
     }
 
+    public List<MapData> getMapData(int rgdId, int mapKey) throws Exception{
+        return mdao.getMapData(rgdId, mapKey,"Marker Load Pipeline");
+    }
 }
