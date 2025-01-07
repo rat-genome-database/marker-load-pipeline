@@ -23,6 +23,9 @@
         <File name="oldData" append="false" fileName="logs/previousAssemblyData.log">
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
         </File>
+        <File name="largeExpSize" append="false" fileName="logs/expectedSizeAbove.log">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </File>
     </Appenders>
 
     <Loggers>
@@ -37,6 +40,10 @@
         </Logger>
         <Logger name="oldData" level="debug" additivity="false">
             <AppenderRef ref="oldData" level="info"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+        <Logger name="largeExpSize" level="debug" additivity="false">
+            <AppenderRef ref="largeExpSize" level="info"/>
             <AppenderRef ref="Console" level="info"/>
         </Logger>
     </Loggers>

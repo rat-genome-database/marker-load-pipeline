@@ -24,6 +24,7 @@ public class Main {
     private final DAO dao = new DAO();
     protected Logger logger = LogManager.getLogger("status");
     protected Logger oldDataLog = LogManager.getLogger("oldData");
+    protected Logger aboveCeilLog = LogManager.getLogger("largeExpSize");
     private SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public static void main(String[] args) throws Exception {
@@ -48,8 +49,8 @@ public class Main {
         long pipeStart = System.currentTimeMillis();
         logger.info("Pipeline started at "+sdt.format(new Date(pipeStart))+"\n");
 
-        HashMap<String, String> chrMap = getChromosomeMap();
-        Map<String, List<Marker>> markerMap = new HashMap<>();
+//        HashMap<String, String> chrMap = getChromosomeMap();
+        Map<Integer, List<Marker>> markerMap = new HashMap<>();
 
         BufferedReader br = openFile(markerFile);
         String lineData;
@@ -60,22 +61,24 @@ public class Main {
                 String[] lineSplit = lineData.split("\\s");
 
                 Marker m = new Marker();
-                m.setSymbol(lineSplit[0]);
-                m.setChr(chrMap.get(lineSplit[1]));
+                String[] nameSplit = lineSplit[0].split("_");
+                m.setRgdId(Integer.parseInt(nameSplit[0]));
+                m.setSymbol(nameSplit[1]);
+                m.setChr(lineSplit[1].replace("chr",""));
                 m.setStrand(lineSplit[2]);
                 m.setStart(Integer.parseInt(lineSplit[3]));
                 m.setStop(Integer.parseInt(lineSplit[4]));
                 m.setExpectedSize(Integer.parseInt(lineSplit[5]));
 
-                List<Marker> mList = markerMap.get(m.getSymbol());
+                List<Marker> mList = markerMap.get(m.getRgdId());
                 if (mList == null){
                     mList= new ArrayList<>();
                     mList.add(m);
-                    markerMap.put(m.getSymbol(),mList);
+                    markerMap.put(m.getRgdId(),mList);
                 }
                 else {
                     mList.add(m);
-                    markerMap.put(m.getSymbol(),mList);
+                    markerMap.put(m.getRgdId(),mList);
                 }
 
             } // end if
@@ -83,24 +86,28 @@ public class Main {
         }// end file loop
 
         br.close();
-        logger.info("Name|Chr|Strand|Start|Stop|Expected Size");
+        logger.info("RGDID|Name|Chr|Strand|Start|Stop|Expected Size");
         int aboveThreshCnt = 0;
         int noneThreshCnt = 0;
+        int aboveThreshCeilCnt = 0;
         List<MapData> mapDataList = new ArrayList<>();
-        for (String key : markerMap.keySet()){
+        for (Integer key : markerMap.keySet()){
             List<Marker> markers = markerMap.get(key);
             List<Marker> aboveThresh = new ArrayList<>();
+            List<Marker> aboveCeiling = new ArrayList<>();
             // loop through markers
             for(Marker m : markers) {
-                if (m.getExpectedSize()>60)
+                if (m.getExpectedSize()>60 && m.getExpectedSize()<=1000)
                     aboveThresh.add(m);
+                if (m.getExpectedSize()>1000)
+                    aboveCeiling.add(m);
             }
 
 
             if (aboveThresh.size()==1){
                 // if 1 is above threshold, add/update that obj
                 Marker m = aboveThresh.get(0);
-                List<SSLP> sslps = dao.getActiveSSLPsByNameOnly(m.getSymbol());
+                List<SSLP> sslps = dao.getSSLPs(m.getRgdId());
                 if (sslps.isEmpty()){
                     SSLP sslp = new SSLP();
                     sslp.setName(m.getSymbol());
@@ -167,10 +174,17 @@ public class Main {
                 }
                 logger.info("");
             }
-
+            if (!aboveCeiling.isEmpty()){
+                aboveThreshCeilCnt++;
+                for(Marker m : aboveCeiling){
+                    aboveCeilLog.info(m.dump("|"));
+                }
+            }
         }
+
         logger.info("total above thresh: "+aboveThreshCnt);
-        logger.info("total none above thresh: "+ noneThreshCnt);
+        logger.info("total with none above thresh: "+ noneThreshCnt);
+        logger.info("Total above ceiling threshold: "+aboveThreshCeilCnt);
         if (!mapDataList.isEmpty()){
             logger.info("New marker mapdata being made: " +mapDataList.size());
             dao.insertMapsData(mapDataList);

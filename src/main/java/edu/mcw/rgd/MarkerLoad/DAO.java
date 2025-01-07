@@ -28,6 +28,10 @@ public class DAO {
         return sdao.getActiveSSLPsByName(name,3);
     }
 
+    public List<SSLP> getSSLPs(int rgdId) throws Exception {
+        return sdao.getSSLPs(rgdId);
+    }
+
     public RgdId createRgdId(int objectKey, String objectStatus, String notes, int mapKey) throws Exception{
         int speciesKey= SpeciesType.getSpeciesTypeKeyForMap(mapKey);
         return managementDAO.createRgdId(objectKey, objectStatus, notes, speciesKey);

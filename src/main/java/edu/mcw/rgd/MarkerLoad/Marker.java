@@ -1,6 +1,7 @@
 package edu.mcw.rgd.MarkerLoad;
 
 public class Marker {
+    private Integer rgdId;
     private String symbol;
     private String chr;
     private String strand;
@@ -57,6 +58,14 @@ public class Marker {
     }
 
     public String dump(String delim){
-        return this.symbol + delim + this.chr + delim + this.strand + delim + this.start + delim + this.stop + delim + this.expectedSize;
+        return this.rgdId + delim + this.symbol + delim + this.chr + delim + this.strand + delim + this.start + delim + this.stop + delim + this.expectedSize;
+    }
+
+    public Integer getRgdId() {
+        return rgdId;
+    }
+
+    public void setRgdId(Integer rgdId) {
+        this.rgdId = rgdId;
     }
 }
