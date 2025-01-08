@@ -51,7 +51,7 @@ public class Main {
 
 //        HashMap<String, String> chrMap = getChromosomeMap();
         Map<Integer, List<Marker>> markerMap = new HashMap<>();
-
+        logger.info("Parsing file:" + markerFile);
         BufferedReader br = openFile(markerFile);
         String lineData;
         int z = 0;
