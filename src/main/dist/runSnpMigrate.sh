@@ -17,3 +17,5 @@ java -Dspring.config=$APPDIR/../properties/default_db2.xml \
 
 mailx -s "[$SERVER] Marker Load Pipeline Run" $EMAILLIST < $APPDIR/logs/migSummary.log
 
+mailx -s "[$SERVER] Marker Load Pipeline - SSLPs NO Allele" $EMAILLIST < $APPDIR/logs/skippedSSLPs.log
+
