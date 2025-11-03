@@ -189,6 +189,7 @@ public class SnpMigration {
             }
             catch (Exception e){
                 logger.warn(e);
+                logger.warn("SSLP RGD ID: " + sslp.getRgdId());
             }
 
         }
