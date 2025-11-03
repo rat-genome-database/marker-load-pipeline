@@ -6,4 +6,8 @@
         <property name="markerFile" value="data/in_silico_pcr_unique_gapLessThan5_blat_oneblock.csv"/>
         <property name="mapKey" value="380"/>
     </bean>
+    <bean id="snpMigration" class="edu.mcw.rgd.MarkerLoad.SnpMigration">
+        <property name="version" value="Marker Load Pipeline -- SNP Migration -- build 10/22/2025"/>
+        <property name="primaryAssembly" value="380"/>
+    </bean>
 </beans>
