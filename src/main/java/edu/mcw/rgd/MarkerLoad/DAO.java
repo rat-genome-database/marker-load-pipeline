@@ -98,6 +98,10 @@ public class DAO {
         adao.insertStrainAssociation(strainRgdId, associationRgdId);
     }
 
+    public void insertStrainAssociation(Strain2MarkerAssociation assoc) throws Exception {
+        adao.insertStrainAssociation(assoc);
+    }
+
     public void insertVariants(Collection<VariantMapData> mapsData)  throws Exception{
         vdao.insertVariants(mapsData);
     }
@@ -129,5 +133,9 @@ public class DAO {
             sql2.update(v.getRsId(),id);
         }
         sql2.flush();
+    }
+
+    public List<Strain2MarkerAssociation> getStrain2SslpAssociations(int strainRgdId) throws Exception {
+        return adao.getStrain2SslpAssociations(strainRgdId);
     }
 }

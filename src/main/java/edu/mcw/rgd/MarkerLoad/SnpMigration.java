@@ -144,8 +144,8 @@ public class SnpMigration {
                             }
                         }
                         if (newVariant) {
-                            RgdId r = dao.createRgdId(RgdId.OBJECT_KEY_VARIANTS, "ACTIVE", "created by Marker Load Pipeline", mappedSslp.getMapKey());
-                            vmd.setId(r.getRgdId());
+//                            RgdId r = dao.createRgdId(RgdId.OBJECT_KEY_VARIANTS, "ACTIVE", "created by Marker Load Pipeline", mappedSslp.getMapKey());
+//                            vmd.setId(r.getRgdId());
                             String genicStat = isGenic(vmd) ? "GENIC" : "INTERGENIC";
                             vmd.setGenicStatus(genicStat);
 //                        vmd.setId(12345678);
@@ -161,20 +161,25 @@ public class SnpMigration {
                     if (!qtlWithSSLP.isEmpty()) {
                         // figure out if flanking or peak marker uses rgdId and update with variant rgdId
                         for (QTL qtl : qtlWithSSLP) {
+                            boolean update = false;
                             logger.info("\t\tQTL having an updated marker: " + qtl.getSymbol() + ":" + qtl.getRgdId());
                             if (Utils.intsAreEqual(qtl.getFlank1RgdId(), sslp.getRgdId())) {
+                                update=true;
                                 logger.info("\t\t\tOld Flank 1 RGD Id: " + qtl.getFlank1RgdId() + " | New RGD Id: " + latestRgdId);
                                 qtl.setFlank1RgdId(latestRgdId);
                             }
                             if (Utils.intsAreEqual(qtl.getFlank2RgdId(), sslp.getRgdId())) {
+                                update=true;
                                 logger.info("\t\t\tOld Flank 2 RGD Id: " + qtl.getFlank2RgdId() + " | New RGD Id: " + latestRgdId);
                                 qtl.setFlank2RgdId(latestRgdId);
                             }
                             if (Utils.intsAreEqual(qtl.getPeakRgdId(), sslp.getRgdId())) {
+                                update=true;
                                 logger.info("\t\t\tOld Peak RGD Id: " + qtl.getPeakRgdId() + " | New RGD Id: " + latestRgdId);
                                 qtl.setPeakRgdId(latestRgdId);
                             }
-                            dao.updateQtl(qtl);
+                            if (update)
+                                dao.updateQtl(qtl);
                         }
                     }
                     if (!strainWithSSLP.isEmpty()) {
@@ -182,8 +187,24 @@ public class SnpMigration {
                         for (Strain s : strainWithSSLP) {
                             logger.info("\t\tStrain with an updated marker: " + s.getSymbol() + ":" + s.getRgdId());
                             try {
+                                List<Strain2MarkerAssociation> strainAssocs = dao.getStrain2SslpAssociations(s.getRgdId());
+                                Strain2MarkerAssociation sm = new Strain2MarkerAssociation();
+                                sm.setAssocKey(s.getKey());
+                                sm.setMasterRgdId(s.getRgdId());
+                                sm.setDetailRgdId(latestRgdId);
+                                sm.setMarkerRgdId(latestRgdId);
+                                for (Strain2MarkerAssociation s2m : strainAssocs){
+                                    if (s2m.getDetailRgdId() == sslp.getRgdId())
+                                    {
+                                        sm.setAssocType(s2m.getAssocType());
+                                        sm.setAssocSubType(s2m.getAssocSubType());
+                                        break;
+                                    }
+                                }
+
                                 dao.removeStrainAssociation(s.getRgdId(), sslp.getRgdId());
-                                dao.insertStrainAssociation(s.getRgdId(), latestRgdId);
+                                dao.insertStrainAssociation(sm);
+//                                dao.insertStrainAssociation(s.getRgdId(), latestRgdId);
                             } catch (Exception ignore) {
                             }
                         }
