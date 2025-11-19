@@ -144,8 +144,8 @@ public class SnpMigration {
                             }
                         }
                         if (newVariant) {
-//                            RgdId r = dao.createRgdId(RgdId.OBJECT_KEY_VARIANTS, "ACTIVE", "created by Marker Load Pipeline", mappedSslp.getMapKey());
-//                            vmd.setId(r.getRgdId());
+                            RgdId r = dao.createRgdId(RgdId.OBJECT_KEY_VARIANTS, "ACTIVE", "created by Marker Load Pipeline", mappedSslp.getMapKey());
+                            vmd.setId(r.getRgdId());
                             String genicStat = isGenic(vmd) ? "GENIC" : "INTERGENIC";
                             vmd.setGenicStatus(genicStat);
 //                        vmd.setId(12345678);
