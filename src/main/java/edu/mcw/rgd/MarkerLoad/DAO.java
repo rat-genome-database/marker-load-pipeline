@@ -4,14 +4,11 @@ import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.impl.variants.VariantDAO;
 import edu.mcw.rgd.datamodel.*;
-import edu.mcw.rgd.datamodel.pheno.*;
-import edu.mcw.rgd.datamodel.pheno.Sample;
 import edu.mcw.rgd.datamodel.variants.VariantMapData;
 import org.springframework.jdbc.object.BatchSqlUpdate;
 
 import java.sql.Types;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 
 /**
