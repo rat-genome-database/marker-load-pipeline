@@ -32,8 +32,18 @@ public class Main {
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
         try {
 //            BulkSampleLoad bulkLoad = (BulkSampleLoad) bf.getBean("bulkLoad");
-            Main main = (Main) bf.getBean("main");
-            main.run();
+            for (int i = 0; i < args.length; i++) {
+                switch (args[i]) {
+                    case "-markerLoad":
+                        Main main = (Main) bf.getBean("main");
+                        main.run();
+                        break;
+                    case "-snpMigrate":
+                        SnpMigration migration = (SnpMigration) bf.getBean("snpMigration");
+                        migration.run();
+                        break;
+                }
+            }
         }
         catch (Exception e) {
             Utils.printStackTrace(e, LogManager.getLogger("status"));

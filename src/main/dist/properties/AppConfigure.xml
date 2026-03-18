@@ -1,9 +1,14 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
     <bean id="main" class="edu.mcw.rgd.MarkerLoad.Main">
-        <property name="version" value="Marker Load Pipeline -- build 01/07/2025"/>
+        <property name="version" value="marker-load-pipeline -- build Jan 07, 2025"/>
 <!--        <property name="markerFile" value="C:\Github\marker-load-pipeline\src\main\dist\data\rgd_markers_GRCr8_minIdentity98_pslReps_gapLessThan5_blat_oneblock.csv"/>-->
         <property name="markerFile" value="data/in_silico_pcr_unique_gapLessThan5_blat_oneblock.csv"/>
         <property name="mapKey" value="380"/>
+    </bean>
+
+    <bean id="snpMigration" class="edu.mcw.rgd.MarkerLoad.SnpMigration">
+        <property name="version" value="marker-load-pipeline -- snp-migration -- build Oct 22, 2025"/>
+        <property name="primaryAssembly" value="380"/>
     </bean>
 </beans>

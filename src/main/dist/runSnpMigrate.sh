@@ -13,7 +13,9 @@ cd $APPDIR
 
 java -Dspring.config=$APPDIR/../properties/default_db2.xml \
     -Dlog4j.configurationFile=file://$APPDIR/properties/log4j2.xml \
-    -jar lib/$APPNAME.jar -markerLoad "$@" > run.log 2>&1
+    -jar lib/$APPNAME.jar -snpMigrate "$@" > runMigration.log 2>&1
 
-mailx -s "[$SERVER] Marker Load Pipeline Run" $EMAILLIST < $APPDIR/logs/summary.log
-mailx -s "[$SERVER] Marker Load Pipeline Old Marker Expected Sizes" $EMAILLIST < $APPDIR/logs/previousAssemblyData.log
+mailx -s "[$SERVER] Marker Load Pipeline Run" $EMAILLIST < $APPDIR/logs/migSummary.log
+
+mailx -s "[$SERVER] Marker Load Pipeline - SSLPs NO Allele" $EMAILLIST < $APPDIR/logs/skippedSSLPs.log
+
