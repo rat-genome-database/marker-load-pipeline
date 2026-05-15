@@ -4,6 +4,7 @@ import edu.mcw.rgd.datamodel.Chromosome;
 import edu.mcw.rgd.datamodel.MapData;
 import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.SSLP;
+import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.process.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -59,15 +60,29 @@ public class Main {
         long pipeStart = System.currentTimeMillis();
         logger.info("Pipeline started at "+sdt.format(new Date(pipeStart))+"\n");
 
-//        HashMap<String, String> chrMap = getChromosomeMap();
+        Map<Integer, List<Marker>> markerMap = parseMarkerFile(markerFile);
+
+        logger.info("RGDID|Name|Chr|Strand|Start|Stop|Expected Size");
+
+        List<MapData> mapDataList = new ArrayList<>();
+        Counters counters = new Counters();
+
+        for (List<Marker> markers : markerMap.values()) {
+            processGroup(markers, mapDataList, counters);
+        }
+
+        logSummary(counters, mapDataList, pipeStart);
+    }
+
+    Map<Integer, List<Marker>> parseMarkerFile(String fileName) throws Exception {
+
+        logger.info("Parsing file:" + fileName);
         Map<Integer, List<Marker>> markerMap = new HashMap<>();
-        logger.info("Parsing file:" + markerFile);
-        BufferedReader br = openFile(markerFile);
+        BufferedReader br = openFile(fileName);
         String lineData;
         int z = 0;
         while ((lineData = br.readLine()) != null) {
             if (z>2){
-//                System.out.println(lineData);
                 String[] lineSplit = lineData.split("\\s");
 
                 Marker m = new Marker();
@@ -91,116 +106,119 @@ public class Main {
                     markerMap.put(m.getRgdId(),mList);
                 }
 
-            } // end if
+            }
             z++;
-        }// end file loop
-
+        }
         br.close();
-        logger.info("RGDID|Name|Chr|Strand|Start|Stop|Expected Size");
-        int aboveThreshCnt = 0;
-        int noneThreshCnt = 0;
-        int aboveThreshCeilCnt = 0;
-        List<MapData> mapDataList = new ArrayList<>();
-        for (Integer key : markerMap.keySet()){
-            List<Marker> markers = markerMap.get(key);
-            List<Marker> aboveThresh = new ArrayList<>();
-            List<Marker> aboveCeiling = new ArrayList<>();
-            // loop through markers
-            for(Marker m : markers) {
-                if (m.getExpectedSize()>60 && m.getExpectedSize()<=1000)
-                    aboveThresh.add(m);
-                if (m.getExpectedSize()>1000)
-                    aboveCeiling.add(m);
-            }
+        return markerMap;
+    }
 
+    void processGroup(List<Marker> markers, List<MapData> mapDataList, Counters counters) throws Exception {
 
-            if (aboveThresh.size()==1){
-                // if 1 is above threshold, add/update that obj
-                Marker m = aboveThresh.get(0);
-                List<SSLP> sslps = dao.getSSLPs(m.getRgdId());
-                if (sslps.isEmpty()){
-                    SSLP sslp = new SSLP();
-                    sslp.setName(m.getSymbol());
-                    sslp.setSpeciesTypeKey(3);
-                    sslp.setExpectedSize(m.getExpectedSize());
-                    RgdId r = dao.createRgdId(RgdId.OBJECT_KEY_SSLPS, "ACTIVE", "created by Marker Load Pipeline", mapKey);
-                    sslp.setRgdId(r.getRgdId());
-                    dao.insertSSLP(sslp);
-                    MapData md = new MapData();
-                    md.setChromosome(m.getChr());
-                    md.setRgdId(r.getRgdId());
-                    md.setStartPos(m.getStart());
-                    md.setStopPos(m.getStop());
-                    md.setStrand(m.getStrand());
-                    md.setMapKey(mapKey);
-                    md.setSrcPipeline("Marker Load Pipeline");
-                    mapDataList.add(md);
-                }
-                else {
-                    SSLP sslp = null;
-                    for (SSLP s : sslps){
-                        if (s.getExpectedSize()!=0){
-                            sslp = s;
-                            break;
-                        }
-                    }
-                    if (sslp==null){
-                        sslp = sslps.get(0);
-                    }
-                    if (!Utils.intsAreEqual(sslp.getExpectedSize(), m.getExpectedSize())) {
-                        oldDataLog.info(sslp.getName()+"|OLD: "+sslp.getExpectedSize()+"|"+"NEW: "+m.getExpectedSize());
-                        sslp.setExpectedSize(m.getExpectedSize());
-                        dao.updateSSLP(sslp);
-                        List<MapData> mapsData = dao.getMapData(sslp.getRgdId(),mapKey);
-                        if (mapsData.isEmpty()) {
-                            MapData md = new MapData();
-                            md.setChromosome(m.getChr());
-                            md.setRgdId(sslp.getRgdId());
-                            md.setStartPos(m.getStart());
-                            md.setStopPos(m.getStop());
-                            md.setStrand(m.getStrand());
-                            md.setMapKey(mapKey);
-                            md.setSrcPipeline("Marker Load Pipeline");
-                            mapDataList.add(md);
-                        }
-                    }
-                }
-            }
-            else if (aboveThresh.size()>1){
-                // if multiple is above threshold, need curator
-                aboveThreshCnt++;
-                logger.info("Multiple above threshold:");
-                for (Marker m : aboveThresh){
-                    logger.info(m.dump("|"));
-                }
-                logger.info("");
+        List<Marker> aboveThresh = new ArrayList<>();
+        List<Marker> aboveCeiling = new ArrayList<>();
+        for(Marker m : markers) {
+            if (m.getExpectedSize()>60 && m.getExpectedSize()<=1000)
+                aboveThresh.add(m);
+            if (m.getExpectedSize()>1000)
+                aboveCeiling.add(m);
+        }
+
+        if (aboveThresh.size()==1){
+            // if 1 is above threshold, add/update that obj
+            Marker m = aboveThresh.get(0);
+            List<SSLP> sslps = dao.getSSLPs(m.getRgdId());
+            if (sslps.isEmpty()){
+                SSLP sslp = new SSLP();
+                sslp.setName(m.getSymbol());
+                sslp.setSpeciesTypeKey(SpeciesType.RAT);
+                sslp.setExpectedSize(m.getExpectedSize());
+                RgdId r = dao.createRgdId(RgdId.OBJECT_KEY_SSLPS, "ACTIVE", "created by Marker Load Pipeline", mapKey);
+                sslp.setRgdId(r.getRgdId());
+                dao.insertSSLP(sslp);
+                MapData md = new MapData();
+                md.setChromosome(m.getChr());
+                md.setRgdId(r.getRgdId());
+                md.setStartPos(m.getStart());
+                md.setStopPos(m.getStop());
+                md.setStrand(m.getStrand());
+                md.setMapKey(mapKey);
+                md.setSrcPipeline("Marker Load Pipeline");
+                mapDataList.add(md);
             }
             else {
-                // if none are above threshold, need curator
-                noneThreshCnt++;
-                logger.info("None above threshold:");
-                for (Marker m : markers){
-                    logger.info(m.dump("|"));
+                SSLP sslp = null;
+                for (SSLP s : sslps){
+                    if (s.getExpectedSize()!=0){
+                        sslp = s;
+                        break;
+                    }
                 }
-                logger.info("");
-            }
-            if (!aboveCeiling.isEmpty()){
-                aboveThreshCeilCnt++;
-                for(Marker m : aboveCeiling){
-                    aboveCeilLog.info(m.dump("|"));
+                if (sslp==null){
+                    sslp = sslps.get(0);
+                }
+                if (!Utils.intsAreEqual(sslp.getExpectedSize(), m.getExpectedSize())) {
+                    oldDataLog.info(sslp.getName()+"|OLD: "+sslp.getExpectedSize()+"|"+"NEW: "+m.getExpectedSize());
+                    sslp.setExpectedSize(m.getExpectedSize());
+                    dao.updateSSLP(sslp);
+                    List<MapData> mapsData = dao.getMapData(sslp.getRgdId(),mapKey);
+                    if (mapsData.isEmpty()) {
+                        MapData md = new MapData();
+                        md.setChromosome(m.getChr());
+                        md.setRgdId(sslp.getRgdId());
+                        md.setStartPos(m.getStart());
+                        md.setStopPos(m.getStop());
+                        md.setStrand(m.getStrand());
+                        md.setMapKey(mapKey);
+                        md.setSrcPipeline("Marker Load Pipeline");
+                        mapDataList.add(md);
+                    }
                 }
             }
         }
+        else if (aboveThresh.size()>1){
+            // if multiple is above threshold, need curator
+            counters.aboveThreshCnt++;
+            logger.info("Multiple above threshold:");
+            for (Marker m : aboveThresh){
+                logger.info(m.dump("|"));
+            }
+            logger.info("");
+        }
+        else {
+            // if none are above threshold, need curator
+            counters.noneThreshCnt++;
+            logger.info("None above threshold:");
+            for (Marker m : markers){
+                logger.info(m.dump("|"));
+            }
+            logger.info("");
+        }
+        if (!aboveCeiling.isEmpty()){
+            counters.aboveThreshCeilCnt++;
+            for(Marker m : aboveCeiling){
+                aboveCeilLog.info(m.dump("|"));
+            }
+        }
+    }
 
-        logger.info("total above thresh: "+aboveThreshCnt);
-        logger.info("total with none above thresh: "+ noneThreshCnt);
-        logger.info("Total above ceiling threshold: "+aboveThreshCeilCnt);
+    void logSummary(Counters counters, List<MapData> mapDataList, long pipeStart) throws Exception {
+
+        logger.info("total above thresh: "+counters.aboveThreshCnt);
+        logger.info("total with none above thresh: "+ counters.noneThreshCnt);
+        logger.info("Total above ceiling threshold: "+counters.aboveThreshCeilCnt);
         if (!mapDataList.isEmpty()){
             logger.info("New marker mapdata being made: " +mapDataList.size());
             dao.insertMapsData(mapDataList);
         }
         logger.info(" Total Elapsed time -- elapsed time: "+
                 Utils.formatElapsedTime(pipeStart,System.currentTimeMillis())+"\n");
+    }
+
+    private static class Counters {
+        int aboveThreshCnt;
+        int noneThreshCnt;
+        int aboveThreshCeilCnt;
     }
 
     private BufferedReader openFile(String fileName) throws IOException {

@@ -1,0 +1,20 @@
+May 15, 2026
+  refactor Main: decomposed run() into parseMarkerFile/processGroup/logSummary; replaced magic species key 3 with SpeciesType.RAT; updated dependencies
+
+Mar 18, 2026
+  scripts: fixed email recipients
+
+Nov 19, 2025
+  SnpMigration: updated rgd_strains_rgd migration logic
+
+Nov 06, 2025
+  SnpMigration: do not retire skipped sslps; moved sslps into variant tables; improved exception logging
+
+Jan 08, 2025
+  improved logging; updated for new file format
+
+Nov 12, 2024
+  bug fixes: check if mapdata exists before insert; actually update sslp on change; fixed file location
+
+Oct 29, 2024
+  initial commit
