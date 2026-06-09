@@ -1,7 +1,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
     <bean id="main" class="edu.mcw.rgd.MarkerLoad.Main">
-        <property name="version" value="marker-load-pipeline -- build May 15, 2026"/>
+        <property name="version" value="marker-load-pipeline -- build Jun 9, 2026"/>
 <!--        <property name="markerFile" value="C:\Github\marker-load-pipeline\src\main\dist\data\rgd_markers_GRCr8_minIdentity98_pslReps_gapLessThan5_blat_oneblock.csv"/>-->
         <property name="markerFile" value="data/in_silico_pcr_unique_gapLessThan5_blat_oneblock.csv"/>
         <property name="mapKey" value="380"/>

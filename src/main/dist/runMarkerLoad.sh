@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+#
+# run the marker load module
+#
 . /etc/profile
 APPNAME=marker-load-pipeline
 SERVER=`hostname -s | tr '[a-z]' '[A-Z]'`
@@ -11,9 +14,7 @@ fi
 APPDIR=/home/rgddata/pipelines/$APPNAME
 cd $APPDIR
 
-java -Dspring.config=$APPDIR/../properties/default_db2.xml \
-    -Dlog4j.configurationFile=file://$APPDIR/properties/log4j2.xml \
-    -jar lib/$APPNAME.jar -markerLoad "$@" > run.log 2>&1
+$APPDIR/_run.sh -markerLoad "$@"
 
 mailx -s "[$SERVER] Marker Load Pipeline Run" $EMAILLIST < $APPDIR/logs/summary.log
 mailx -s "[$SERVER] Marker Load Pipeline Old Marker Expected Sizes" $EMAILLIST < $APPDIR/logs/previousAssemblyData.log

@@ -32,24 +32,38 @@ public class Main {
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
         try {
-//            BulkSampleLoad bulkLoad = (BulkSampleLoad) bf.getBean("bulkLoad");
+            boolean validParam = false;
             for (int i = 0; i < args.length; i++) {
                 switch (args[i]) {
                     case "-markerLoad":
+                        validParam = true;
                         Main main = (Main) bf.getBean("main");
                         main.run();
                         break;
                     case "-snpMigrate":
+                        validParam = true;
                         SnpMigration migration = (SnpMigration) bf.getBean("snpMigration");
                         migration.run();
                         break;
                 }
+            }
+            // no recognized module on the command line -- show usage and abort
+            if( !validParam ) {
+                usage();
+                System.exit(1);
             }
         }
         catch (Exception e) {
             Utils.printStackTrace(e, LogManager.getLogger("status"));
             throw e;
         }
+    }
+
+    static void usage() {
+        System.out.println("Usage: marker-load-pipeline <module> [parameters]");
+        System.out.println("  valid modules:");
+        System.out.println("    -markerLoad   load markers from the marker file");
+        System.out.println("    -snpMigrate   migrate SSLP markers (SNP migration)");
     }
 
     void run() throws Exception{
