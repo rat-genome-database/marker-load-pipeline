@@ -1,8 +1,14 @@
+Jun 15, 2026
+  dropped unused poi-ooxml and commons-collections4 dependencies; fixed GeneCache resource leak; removed dead chromosome-map code
+
 Jun 9, 2026
-  split run.sh into a generic _run.sh (no enforced module) and a new runMarkerLoad.sh (-markerLoad); Main now prints usage and aborts when no valid module parameter is given; aligned log4j-core with the log4j-api that poi-ooxml requires (2.24.3); updated dependencies
+  split run.sh into a generic _run.sh (no enforced module) and a new runMarkerLoad.sh (-markerLoad)
+  Main now prints usage and aborts when no valid module parameter is given
+  aligned log4j-core with the log4j-api that poi-ooxml requires (2.24.3); updated dependencies
 
 May 15, 2026
-  refactor Main: decomposed run() into parseMarkerFile/processGroup/logSummary; replaced magic species key 3 with SpeciesType.RAT; updated dependencies
+  refactor Main: decomposed run() into parseMarkerFile/processGroup/logSummary
+  replaced magic species key 3 with SpeciesType.RAT; updated dependencies
 
 Mar 18, 2026
   scripts: fixed email recipients

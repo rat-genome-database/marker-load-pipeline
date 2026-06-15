@@ -28,10 +28,6 @@ public class DAO {
         return sdao.getConnectionInfo();
     }
 
-    public List<Chromosome> getChromosomes(int mapKey) throws Exception{
-        return mdao.getChromosomes(mapKey);
-    }
-
     public List<SSLP> getActiveSSLPsByNameOnly(String name) throws Exception{
         return sdao.getActiveSSLPsByName(name,3);
     }

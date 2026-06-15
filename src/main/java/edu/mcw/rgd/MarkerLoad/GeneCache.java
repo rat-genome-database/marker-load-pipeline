@@ -30,15 +30,16 @@ public class GeneCache {
 			"AND md.rgd_id = r.RGD_ID and r.rgd_id = g.rgd_id "+
 			"and r.OBJECT_STATUS = 'ACTIVE' and r.OBJECT_KEY = 1 "+
             "ORDER BY start_pos, stop_pos";
-        Connection conn = ds.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setString(1, chromosome);
-        ps.setInt(2, mapKey);
-        ResultSet rs = ps.executeQuery();
-        while( rs.next() ) {
-            entries.add(new GeneCacheEntry(rs.getInt(1), rs.getInt(2), rs.getInt(3)));
+        try( Connection conn = ds.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql) ) {
+            ps.setString(1, chromosome);
+            ps.setInt(2, mapKey);
+            try( ResultSet rs = ps.executeQuery() ) {
+                while( rs.next() ) {
+                    entries.add(new GeneCacheEntry(rs.getInt(1), rs.getInt(2), rs.getInt(3)));
+                }
+            }
         }
-        conn.close();
 
         return entries.size();
     }
@@ -95,7 +96,7 @@ public class GeneCache {
         return results;
     }
 
-    class GeneCacheEntry {
+    static class GeneCacheEntry {
         public int rgdId;
         public int startPos;
         public int stopPos;

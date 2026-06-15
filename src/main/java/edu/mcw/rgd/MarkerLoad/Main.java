@@ -1,6 +1,5 @@
 package edu.mcw.rgd.MarkerLoad;
 
-import edu.mcw.rgd.datamodel.Chromosome;
 import edu.mcw.rgd.datamodel.MapData;
 import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.SSLP;
@@ -250,14 +249,6 @@ public class Main {
         return reader;
     }
 
-    HashMap<String,String> getChromosomeMap() throws Exception{
-        List<Chromosome> chrs = dao.getChromosomes(mapKey);
-        HashMap<String,String> map = new HashMap<>();
-        for (Chromosome chr : chrs){
-            map.put(chr.getGenbankId(),chr.getChromosome());
-        }
-        return map;
-    }
     public void setVersion(String version) {
         this.version = version;
     }
